@@ -175,7 +175,7 @@ You MUST reply ONLY with a valid JSON object matching this schema:
             }
             if provider == "OpenRouter":
                 headers["HTTP-Referer"] = "https://pinokio.computer"
-                headers["X-Title"] = "AI Colorer"
+                headers["X-Title"] = "Dolce Colore"
 
             payload = {
                 "model": model,

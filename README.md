@@ -1,4 +1,4 @@
-# 🎨 AI Colorer
+# 🎨 Dolce Colore
 
 Locally colorize black-and-white public domain movies and historical photos using
 [DDColor](https://github.com/piddnad/DDColor) (ICCV 2023), a state-of-the-art neural
@@ -29,6 +29,7 @@ Apple Silicon MPS, or Intel XPU) when detected.
 
 - 🎬 **Movie & Video Colorization**:
   - Colorize classic public domain movies frame-by-frame with H.264 video encoding.
+  - **AI Keyframe Historical Grading (Optional)**: Analyze the opening frame with a Vision API and, if enabled, automatically apply its recommended saturation/contrast/temperature bias to every rendered frame.
   - **Automatic Audio Preservation**: Synchronizes and muxes the original audio track back in.
   - **Preview Snippet Modes**: Test the first 5 or 10 seconds or custom durations to verify color grading in seconds before processing a feature-length film!
   - **Performance Downscaling**: Optional 720p or 480p downscaling for dramatic speedups on standard laptops and Intel graphics.
@@ -94,6 +95,11 @@ video_result = client.predict(
     preview_duration=5,
     video_scale="Original Resolution",
     output_format="Full Colorized Video",
+    ai_apply_grading=False,          # set True to auto-analyze the first frame and grade every frame to match
+    ai_provider="Google Gemini",
+    ai_key="",
+    ai_model="gemini-2.0-flash",
+    ai_context="",
     api_name="/colorize_video"
 )
 print("Colorized Video:", video_result[0])
@@ -122,10 +128,15 @@ const videoResult = await client.predict("/colorize_video", {
   video_path: await client.uploadFile(videoFile),
   model_name: "DDColor-T Tiny (Fast & Lightweight - Recommended for CPU/Intel)",
   input_size: 384,
-  mode="Preview: First 5 Seconds",
+  mode: "Preview: First 5 Seconds",
   preview_duration: 5,
   video_scale: "Original Resolution",
-  output_format: "Full Colorized Video"
+  output_format: "Full Colorized Video",
+  ai_apply_grading: false, // set true to auto-analyze the first frame and grade every frame to match
+  ai_provider: "Google Gemini",
+  ai_key: "",
+  ai_model: "gemini-2.0-flash",
+  ai_context: ""
 });
 console.log("Colorized video:", videoResult.data[0]);
 ```

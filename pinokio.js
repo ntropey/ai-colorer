@@ -1,7 +1,7 @@
 const path = require('path')
 module.exports = {
   version: "7.0",
-  title: "AI Colorer",
+  title: "Dolce Colore",
   description: "Locally colorize black-and-white public domain movies and photos with DDColor. No Nvidia GPU or cloud API required.",
   icon: "icon.png",
   menu: async (kernel, info) => {
