@@ -1,0 +1,5 @@
+{
+  "title": "AI Colorer",
+  "description": "Locally colorize black-and-white public domain movies and historical photos with DDColor. Runs on CPU, Intel Graphics, Apple Silicon, or NVIDIA CUDA.",
+  "icon": "icon.png"
+}
