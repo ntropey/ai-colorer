@@ -320,10 +320,15 @@ def colorize_video(
     preview_duration=5,
     video_scale="Original Resolution",
     output_format="Full Colorized Video",
+    ai_apply_grading=False,
+    ai_provider="Google Gemini",
+    ai_key="",
+    ai_model="gemini-2.0-flash",
+    ai_context="",
     progress=gr.Progress(),
 ):
     if not video_path:
-        return None, None, "⚠️ Please upload or select a video to colorize."
+        return None, None, "⚠️ Please upload or select a video to colorize.", ""
 
     start_time = time.time()
     cap = cv2.VideoCapture(video_path)
@@ -369,6 +374,26 @@ def colorize_video(
 
     pipeline = get_pipeline(model_name, int(input_size), progress=progress)
 
+    eff_sat, eff_contrast, eff_temp = 1.0, 1.0, 0
+    ai_card_html = ""
+    if ai_apply_grading and ai_key.strip():
+        progress(0.02, desc=f"🤖 Calling {ai_provider} for historical vision analysis...")
+        ok0, first_frame = cap.read()
+        if ok0 and first_frame is not None:
+            ai_res = ai_assistant.analyze_historical_scene(
+                first_frame,
+                provider=ai_provider,
+                api_key=ai_key.strip(),
+                model=ai_model,
+                context_hint=ai_context.strip(),
+            )
+            if "error" not in ai_res:
+                eff_sat = float(ai_res.get("saturation_bias", 1.0))
+                eff_contrast = float(ai_res.get("contrast_bias", 1.0))
+                eff_temp = int(ai_res.get("color_temperature", 0))
+            ai_card_html = ai_assistant.render_ai_card(ai_res)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
     cmd = [
         "ffmpeg", "-y",
         "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{out_width}x{out_height}", "-r", str(fps),
@@ -392,6 +417,11 @@ def colorize_video(
                 frame = cv2.resize(frame, (target_width, target_height))
 
             colorized = pipeline.process(frame)
+
+            if eff_sat != 1.0 or eff_contrast != 1.0 or eff_temp != 0:
+                colorized_rgb = cv2.cvtColor(colorized, cv2.COLOR_BGR2RGB)
+                colorized_rgb = apply_adjustments(colorized_rgb, eff_sat, eff_contrast, 0.0, eff_temp)
+                colorized = cv2.cvtColor(colorized_rgb, cv2.COLOR_RGB2BGR)
 
             if is_sbs:
                 frame_to_pipe = np.hstack([frame, colorized])
@@ -418,15 +448,16 @@ def colorize_video(
 
     total_time = time.time() - start_time
     avg_fps = frame_idx / max(0.001, total_time)
+    ai_tag = f" • 🤖 {ai_provider} Historically Graded" if (ai_apply_grading and ai_key.strip()) else ""
     status = (
         f"✅ **Video Colorization Finished!**\n\n"
         f"- **Frames Rendered:** {frame_idx} of {max_frames} frames\n"
         f"- **Render Speed:** {avg_fps:.1f} FPS (Total: {total_time:.1f}s)\n"
         f"- **Output Resolution:** {out_width}×{out_height} @ {fps:.1f} FPS\n"
         f"- **Audio:** Original audio track synchronized and preserved\n"
-        f"- **Hardware Engine:** {DEVICE_LABEL}"
+        f"- **Hardware Engine:** {DEVICE_LABEL}{ai_tag}"
     )
-    return output_path, output_path, status
+    return output_path, output_path, status, ai_card_html
 
 
 # Sample images from assets/test_images
@@ -492,14 +523,32 @@ custom_css = """
     border-radius: 10px !important;
     font-weight: 600 !important;
 }
+.header-title h1 {
+    font-size: 44px !important;
+    margin: 0 0 4px 0 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.header-subtitle h3 {
+    margin: 0 0 14px 0 !important;
+    color: #cbd5e1 !important;
+    font-weight: 500 !important;
+}
 """
 
-with gr.Blocks(title="AI Colorer - Neural Film & Photo Colorization") as demo:
+with gr.Blocks(title="Dolce Colore - Neural Film & Photo Colorization") as demo:
     with gr.Column(elem_classes=["header-box"]):
+        gr.Markdown("# 🎨 Dolce Colore", elem_classes=["header-title"])
         gr.Markdown(
-            """# 🎨 AI Colorer
-### Photo-Realistic Neural Colorization for Public Domain Movies & Archival Photos""" +
-            f"\n<span class='hardware-badge'>⚡ Active Engine: {DEVICE_LABEL}</span> "
+            "### Photo-Realistic Neural Colorization for Public Domain Movies & Archival Photos",
+            elem_classes=["header-subtitle"]
+        )
+        gr.Markdown(
+            f"<span class='hardware-badge'>⚡ Active Engine: {DEVICE_LABEL}</span> "
             "<span class='ai-badge'>🤖 Optional AI Vision Guidance</span> "
             "<span class='header-badge'>🔒 100% Private & Local</span> "
             "<span class='header-badge'>🧩 Powered by DDColor (ICCV 2023)</span>"
@@ -718,6 +767,11 @@ Use **Preview Snippets** to quickly test settings before processing entire featu
                             value=""
                         )
                         vid_ai_btn = gr.Button("🔍 Analyze Video Keyframe", variant="secondary")
+                        vid_ai_apply_grading = gr.Checkbox(
+                            label="🎨 Apply this AI historical color grading to the full render",
+                            value=False,
+                            info="Runs the same keyframe analysis automatically when you click Colorize Video, and applies its saturation/temperature/contrast bias to every frame."
+                        )
 
                         vid_ai_provider.change(on_provider_change, inputs=vid_ai_provider, outputs=vid_ai_model)
 
@@ -797,8 +851,11 @@ Use **Preview Snippets** to quickly test settings before processing entire featu
 
             video_btn.click(
                 colorize_video,
-                inputs=[video_in, vid_model, vid_input_size, vid_mode, vid_custom_dur, vid_scale, vid_output_format],
-                outputs=[video_out, vid_download, video_status],
+                inputs=[
+                    video_in, vid_model, vid_input_size, vid_mode, vid_custom_dur, vid_scale, vid_output_format,
+                    vid_ai_apply_grading, vid_ai_provider, vid_ai_key, vid_ai_model, vid_ai_context,
+                ],
+                outputs=[video_out, vid_download, video_status, vid_ai_card],
                 api_name="colorize_video",
             )
 
@@ -806,8 +863,8 @@ Use **Preview Snippets** to quickly test settings before processing entire featu
         with gr.Tab("📖 Guide & Archives", id="tab_guide"):
             gr.Markdown(
                 """
-                ### 📚 About AI Colorer & DDColor
-                **AI Colorer** is a local, privacy-first colorization suite powered by **DDColor** (ICCV 2023).
+                ### 📚 About Dolce Colore & DDColor
+                **Dolce Colore** is a local, privacy-first colorization suite powered by **DDColor** (ICCV 2023).
                 It uses dual decoders and learnable color query tokens to realistically restore monochrome footage without cloud servers or token costs.
 
                 ---
@@ -842,7 +899,7 @@ Use **Preview Snippets** to quickly test settings before processing entire featu
                 ### 🔌 API Reference
                 This application exposes standard Gradio API endpoints accessible via Python, JavaScript, and cURL:
                 - `colorize_image(img, model_name, input_size, saturation, contrast, temperature, ai_enable, ai_provider, ai_key, ai_model, ai_context, ai_save_key)`
-                - `colorize_video(video_path, model_name, input_size, mode, preview_duration, video_scale, output_format)`
+                - `colorize_video(video_path, model_name, input_size, mode, preview_duration, video_scale, output_format, ai_apply_grading, ai_provider, ai_key, ai_model, ai_context)`
                 """
             )
 
