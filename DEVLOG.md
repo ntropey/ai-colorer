@@ -29,3 +29,12 @@ This is a working journal (not user-facing docs) — see `README.md` for that.
 
 ## Next up
 - Wire `ai_assistant` vision guidance into the Batch Photos tab (currently just a flat saturation multiplier, no per-photo analysis).
+- Maybe add a low-key donation link (Ko-fi/Buy Me a Coffee/GitHub Sponsors) in the README/UI footer — user's leaning toward it but not yet. Ruled out Google Ads: this runs as a local Gradio server per-user, no real public traffic for AdSense to serve against, and would likely violate AdSense's invalid-traffic policy.
+
+## 2026-09-11 (later) — Publish readiness pass
+- Audited the launcher against Pinokio publish requirements: `pinokio.json`, `install.js` (AI bundle + torch.js), `start.js`/`reset.js`/`update.js`, `.gitignore` (confirmed `.env` with the AI API key is protected), no hardcoded paths, server binds to `127.0.0.1` with no forced port.
+- Found the "Dolce Colore" rename had missed `pinokio.js` (the file that actually drives the sidebar UI — separate from `pinokio.json`'s marketplace metadata), the "Guide & Archives" in-app text, and the OpenRouter `X-Title` header. Fixed all three.
+- Added the missing feature bullet for AI video grading to `README.md`.
+- Icon confirmed fine as-is: 512x512 PNG, referenced correctly in both `pinokio.json` and `pinokio.js`.
+- Added the `pinokio` GitHub topic tag and a real repo description to `ntropey/ai-colorer` so it surfaces in Pinokio's Discover "latest" section.
+- Branch note: repo uses `main` (protected, PR-only) + `dev` (working branch) intentionally, to prevent direct pushes to `main`. `main` was briefly behind `dev` after the rename-fix commit landed only on `dev` — user is syncing it themselves.
