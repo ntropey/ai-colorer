@@ -13,24 +13,30 @@ export default function LicenseModal({
 
   if (!isOpen) return null;
 
-  // Format serial as user types: DOLCE-XXXX-XXXX-XXXX-XXXX
+  // Format serial if DOLCE key, or accept LemonSqueezy UUID / custom key as-is
   const handleInputChange = (e) => {
-    let raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (!raw.startsWith('DOLCE')) {
-      // Auto-prefix if user just started typing code
-      if (raw.length > 0 && !'DOLCE'.startsWith(raw)) {
-        raw = 'DOLCE' + raw;
-      }
-    }
-    // Chunk into 5-4-4-4-4
-    let formatted = '';
-    if (raw.length > 0) formatted += raw.substring(0, 5);
-    if (raw.length > 5) formatted += '-' + raw.substring(5, 9);
-    if (raw.length > 9) formatted += '-' + raw.substring(9, 13);
-    if (raw.length > 13) formatted += '-' + raw.substring(13, 17);
-    if (raw.length > 17) formatted += '-' + raw.substring(17, 21);
+    const val = e.target.value;
+    const clean = val.trim();
 
-    setSerialInput(formatted.substring(0, 29));
+    // If user starts typing or pasting a DOLCE algorithmic key, format with dashes
+    if (clean.toUpperCase().startsWith('D') && (clean.length <= 5 || clean.toUpperCase().startsWith('DOLCE'))) {
+      let raw = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (raw.length > 0 && !raw.startsWith('DOLCE') && !'DOLCE'.startsWith(raw)) {
+        setSerialInput(clean);
+        setFeedback(null);
+        return;
+      }
+      let formatted = '';
+      if (raw.length > 0) formatted += raw.substring(0, 5);
+      if (raw.length > 5) formatted += '-' + raw.substring(5, 9);
+      if (raw.length > 9) formatted += '-' + raw.substring(9, 13);
+      if (raw.length > 13) formatted += '-' + raw.substring(13, 17);
+      if (raw.length > 17) formatted += '-' + raw.substring(17, 21);
+      setSerialInput(formatted.substring(0, 29));
+    } else {
+      // General key (LemonSqueezy UUID key or other code)
+      setSerialInput(clean);
+    }
     setFeedback(null);
   };
 
@@ -154,21 +160,21 @@ export default function LicenseModal({
             <form onSubmit={handleActivate} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-slate-300 block">
-                  Enter Serial Number
+                  Enter License Key or Serial Number
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={serialInput}
                     onChange={handleInputChange}
-                    placeholder="DOLCE-PRO1-XXXX-XXXX-XXXX"
+                    placeholder="e.g. 38b1460a-5104-... or DOLCE-PRO1-..."
                     className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-xs font-mono tracking-wider text-amber-300 placeholder:text-slate-600 focus:outline-none transition-colors"
-                    maxLength={29}
+                    maxLength={64}
                     required
                   />
                 </div>
                 <p className="text-[10px] text-slate-500">
-                  Offline algorithmic verification. 100% private, no internet phone-home required.
+                  Supports LemonSqueezy license keys and offline algorithmic serial numbers.
                 </p>
               </div>
 
@@ -191,13 +197,13 @@ export default function LicenseModal({
 
               <button
                 type="submit"
-                disabled={isLoading || serialInput.length < 24}
+                disabled={isLoading || serialInput.length < 5}
                 className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold transition-all shadow-md shadow-amber-500/15 cursor-pointer flex items-center justify-center gap-2 text-xs"
               >
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Verifying Serial...</span>
+                    <span>Verifying License...</span>
                   </>
                 ) : (
                   <>
