@@ -62,11 +62,13 @@ def main():
         "--hidden-import", "fastapi",
         "--hidden-import", "starlette",
         "--hidden-import", "uvicorn",
+        "--hidden-import", "multipart",
         "--hidden-import", "webview.platforms.cocoa",
         "--collect-all", "onnxruntime",
         "--collect-all", "pywebview",
         "--collect-all", "fastapi",
         "--collect-all", "starlette",
+        "--collect-all", "multipart",
         "--noconfirm",
         "--osx-bundle-identifier", "com.revisitedlabs.dolcecolore",
         os.path.join(_ROOT, "desktop.py")

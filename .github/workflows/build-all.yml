@@ -32,7 +32,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install onnxruntime-directml opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pythonnet
+          pip install onnxruntime-directml opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pythonnet python-multipart
 
       - name: Install Inno Setup
         run: |
@@ -90,7 +90,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install onnxruntime opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pyobjc-framework-WebKit pyobjc-framework-Cocoa
+          pip install onnxruntime opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pyobjc-framework-WebKit pyobjc-framework-Cocoa python-multipart
 
       - name: Install Frontend Dependencies
         working-directory: ./frontend

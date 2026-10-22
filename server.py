@@ -16,6 +16,12 @@ import logging
 logger = logging.getLogger("DolceColore")
 logger.info("server.py: loading modules...")
 
+# Ensure PyInstaller includes python-multipart for FastAPI Form/File request body handling
+try:
+    import multipart
+except ImportError:
+    pass
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles

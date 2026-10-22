@@ -32,3 +32,4 @@ models/*.pth
 .env
 .dolce_colore/
 dist-installer/
+dist-installer-mac/

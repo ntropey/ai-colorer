@@ -76,6 +76,7 @@ def main():
         "--hidden-import", "clr",
         "--hidden-import", "pythonnet",
         "--hidden-import", "clr_loader",
+        "--hidden-import", "multipart",
         "--hidden-import", "webview.platforms.winforms",
         "--hidden-import", "webview.platforms.edgechromium",
         "--collect-all", "onnxruntime",
@@ -84,6 +85,7 @@ def main():
         "--collect-all", "clr_loader",
         "--collect-all", "fastapi",
         "--collect-all", "starlette",
+        "--collect-all", "multipart",
         "--noconfirm",
         os.path.join(_ROOT, "desktop.py")
     ]
