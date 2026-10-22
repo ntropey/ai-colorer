@@ -12,9 +12,17 @@ import subprocess
 import shutil
 import numpy as np
 import cv2
+import logging
+logger = logging.getLogger("DolceColore")
+logger.info("dolce_engine.py: importing onnxruntime...")
 import onnxruntime as ort
+logger.info("dolce_engine.py: onnxruntime imported")
 
-_ROOT = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    _ROOT = sys._MEIPASS
+else:
+    _ROOT = os.path.dirname(os.path.abspath(__file__))
+
 MODELS_DIR = os.path.join(_ROOT, "models")
 TOOLS_DIR = os.path.join(_ROOT, "tools")
 
@@ -54,7 +62,9 @@ def get_ffmpeg_path():
 
 def detect_acceleration():
     """Detect available ONNX Runtime acceleration providers."""
+    logger.info("dolce_engine.py: detect_acceleration()...")
     available = ort.get_available_providers()
+    logger.info(f"dolce_engine.py: available providers = {available}")
     if "DmlExecutionProvider" in available:
         return ["DmlExecutionProvider", "CPUExecutionProvider"], "DirectML (GPU Acceleration)"
     if "CoreMLExecutionProvider" in available:
@@ -64,7 +74,9 @@ def detect_acceleration():
     return ["CPUExecutionProvider"], "CPU (Multi-Core AVX Optimized)"
 
 
+logger.info("dolce_engine.py: calling detect_acceleration()...")
 PROVIDERS, PROVIDER_LABEL = detect_acceleration()
+logger.info(f"dolce_engine.py: acceleration configured: {PROVIDER_LABEL}")
 
 
 class DolceEngine:

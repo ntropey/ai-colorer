@@ -12,19 +12,30 @@ import tempfile
 import asyncio
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException
+import logging
+logger = logging.getLogger("DolceColore")
+logger.info("server.py: loading modules...")
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import cv2
 import numpy as np
 
+logger.info("server.py: importing dolce_engine...")
 import dolce_engine
+logger.info("server.py: importing ai_vision...")
 import ai_vision
 
-_ROOT = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    _ROOT = sys._MEIPASS
+else:
+    _ROOT = os.path.dirname(os.path.abspath(__file__))
+
 TEMP_DIR = os.path.join(tempfile.gettempdir(), "dolce_colore_media")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
+logger.info("server.py: creating FastAPI app...")
 app = FastAPI(title="Dolce Colore API", version="2.0.0")
 
 # Enable CORS for local Vite development
@@ -36,7 +47,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logger.info("server.py: instantiating DolceEngine...")
 engine = dolce_engine.DolceEngine()
+logger.info("server.py: initialization complete!")
 video_jobs = {}
 
 

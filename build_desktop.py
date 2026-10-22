@@ -37,6 +37,11 @@ def main():
 
     # 2. Package with PyInstaller
     print("\n[2/3] Compiling standalone executable with PyInstaller...")
+
+    # Find pywebview lib directory
+    import webview
+    webview_lib_dir = os.path.join(os.path.dirname(webview.__file__), "lib")
+
     pyinstaller_cmd = [
         sys.executable, "-m", "PyInstaller",
         "--name", "DolceColore",
@@ -47,6 +52,16 @@ def main():
         "--add-data", f"{os.path.join(_ROOT, 'tools')}{os.pathsep}tools",
         "--add-data", f"{os.path.join(_ROOT, 'icon.png')}{os.pathsep}.",
         "--add-data", f"{os.path.join(_ROOT, 'icon.ico')}{os.pathsep}.",
+        "--add-data", f"{webview_lib_dir}{os.pathsep}webview/lib",
+        "--hidden-import", "server",
+        "--hidden-import", "dolce_engine",
+        "--hidden-import", "ai_vision",
+        "--hidden-import", "cv2",
+        "--hidden-import", "numpy",
+        "--hidden-import", "PIL",
+        "--hidden-import", "fastapi",
+        "--hidden-import", "starlette",
+        "--hidden-import", "uvicorn",
         "--hidden-import", "uvicorn.logging",
         "--hidden-import", "uvicorn.loops",
         "--hidden-import", "uvicorn.loops.auto",
@@ -57,18 +72,47 @@ def main():
         "--hidden-import", "uvicorn.protocols.websockets.auto",
         "--hidden-import", "uvicorn.lifespan",
         "--hidden-import", "uvicorn.lifespan.on",
+        "--hidden-import", "clr",
+        "--hidden-import", "pythonnet",
+        "--hidden-import", "clr_loader",
         "--hidden-import", "webview.platforms.winforms",
         "--hidden-import", "webview.platforms.edgechromium",
         "--collect-all", "onnxruntime",
         "--collect-all", "pywebview",
+        "--collect-all", "pythonnet",
+        "--collect-all", "clr_loader",
+        "--collect-all", "fastapi",
+        "--collect-all", "starlette",
         "--noconfirm",
-        "--clean",
         os.path.join(_ROOT, "desktop.py")
     ]
 
     run(" ".join(f'"{arg}"' if " " in arg else arg for arg in pyinstaller_cmd))
 
-    out_exe = os.path.join(_ROOT, "dist", "DolceColore", "DolceColore.exe")
+    dist_dir = os.path.join(_ROOT, "dist", "DolceColore")
+    internal_dir = os.path.join(dist_dir, "_internal")
+
+    # Post-process: ensure interop DLLs are copied directly to dist_dir and _internal
+    if os.path.isdir(webview_lib_dir):
+        print("\nDeploying webview interop DLLs...")
+        for item in os.listdir(webview_lib_dir):
+            src_item = os.path.join(webview_lib_dir, item)
+            dst_root = os.path.join(dist_dir, item)
+            dst_internal = os.path.join(internal_dir, item)
+            if os.path.isfile(src_item):
+                shutil.copy2(src_item, dst_root)
+                shutil.copy2(src_item, dst_internal)
+            elif os.path.isdir(src_item):
+                if not os.path.exists(dst_root):
+                    shutil.copytree(src_item, dst_root)
+                if not os.path.exists(dst_internal):
+                    shutil.copytree(src_item, dst_internal)
+
+    # Also copy icon.png and icon.ico directly to dist/DolceColore
+    shutil.copy2(os.path.join(_ROOT, "icon.png"), os.path.join(dist_dir, "icon.png"))
+    shutil.copy2(os.path.join(_ROOT, "icon.ico"), os.path.join(dist_dir, "icon.ico"))
+
+    out_exe = os.path.join(dist_dir, "DolceColore.exe")
     if os.path.isfile(out_exe):
         print(f"\nSUCCESS: Standalone build complete: {out_exe}")
     else:
