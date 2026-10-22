@@ -1,0 +1,143 @@
+name: Build Standalone Desktop Installers (Windows & macOS)
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows Setup Installer (.exe)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install onnxruntime-directml opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pythonnet
+
+      - name: Install Inno Setup
+        run: |
+          winget install --id JRSoftware.InnoSetup --exact --silent --accept-package-agreements --accept-source-agreements
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Download Neural Model Weights
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path models
+          $modelUrl = "https://huggingface.co/edgetools/ddcolor/resolve/main/ddcolor-tiny-fp16.onnx"
+          $dest = "models/ddcolor-tiny-fp16.onnx"
+          if (-not (Test-Path $dest)) {
+            Invoke-WebRequest -Uri $modelUrl -OutFile $dest
+          }
+
+      - name: Build Desktop App & Setup Installer
+        run: python build_desktop.py
+
+      - name: Create Portable Zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/DolceColore -DestinationPath dist-installer/DolceColore_v2.0.0_Windows_Portable.zip
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DolceColore-Windows
+          path: dist-installer/*
+
+  build-macos:
+    name: Build macOS Disk Image (.dmg)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install macOS Build Tools
+        run: |
+          brew install create-dmg ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install onnxruntime opencv-python-headless pywebview fastapi uvicorn pillow pyinstaller pyobjc-framework-WebKit pyobjc-framework-Cocoa
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Download Neural Model Weights & Bundled FFmpeg
+        run: |
+          mkdir -p models tools
+          curl -L -o models/ddcolor-tiny-fp16.onnx "https://huggingface.co/edgetools/ddcolor/resolve/main/ddcolor-tiny-fp16.onnx"
+          cp $(which ffmpeg) tools/ffmpeg
+          chmod +x tools/ffmpeg
+
+      - name: Build macOS App & DMG
+        run: python3 build_macos.py
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DolceColore-macOS
+          path: dist-installer/*.dmg
+
+  release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all workflow artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/DolceColore-Windows/*
+            release-assets/DolceColore-macOS/*
+          draft: false
+          prerelease: false
+          name: Dolce Colore ${{ github.ref_name }}
+          body: |
+            ## Dolce Colore ${{ github.ref_name }} — 100% Private, Local AI Colorizer
+            Crafted by **Revisited Labs** ([https://revisitedlabs.com](https://revisitedlabs.com))
+
+            ### Downloads:
+            - **Windows Setup Installer**: `DolceColore_Setup_v2.0.0.exe` (Single-click installer with Start Menu & Desktop shortcuts)
+            - **Windows Portable**: `DolceColore_v2.0.0_Windows_Portable.zip` (Zero installation required)
+            - **macOS Disk Image**: `DolceColore_v2.0.0_macOS.dmg` (Apple Silicon M1/M2/M3/M4 & Intel native)

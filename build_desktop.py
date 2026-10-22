@@ -120,9 +120,15 @@ def main():
         print("\nBuild completed in dist/DolceColore.")
 
     # 3. Compile Inno Setup installer if available
-    iscc = shutil.which("iscc") or r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-    if os.path.isfile(iscc):
-        print("\n[3/3] Compiling Windows Setup Installer with Inno Setup...")
+    iscc_candidates = [
+        shutil.which("iscc"),
+        os.path.expandvars(r"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe"),
+        r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+        r"C:\Program Files\Inno Setup 6\ISCC.exe",
+    ]
+    iscc = next((p for p in iscc_candidates if p and os.path.isfile(p)), None)
+    if iscc:
+        print(f"\n[3/3] Compiling Windows Setup Installer with Inno Setup ({iscc})...")
         iss_path = os.path.join(_ROOT, "installer", "dolce_colore.iss")
         run(f'"{iscc}" "{iss_path}"')
         print("SUCCESS: Windows Setup Installer generated in dist-installer/!")

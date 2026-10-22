@@ -31,3 +31,4 @@ models/*.pth
 # User config & keys
 .env
 .dolce_colore/
+dist-installer/
