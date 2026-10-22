@@ -26,6 +26,9 @@ logger.info("server.py: importing dolce_engine...")
 import dolce_engine
 logger.info("server.py: importing ai_vision...")
 import ai_vision
+logger.info("server.py: importing license_manager...")
+import license_manager
+import webbrowser
 
 if getattr(sys, "frozen", False):
     _ROOT = sys._MEIPASS
@@ -82,8 +85,39 @@ def get_system_status():
             "has_key": bool(cfg.get("api_key")),
             "model": cfg.get("model", "gemini-2.0-flash"),
         },
-        "ffmpeg": os.path.basename(engine.ffmpeg_path)
+        "ffmpeg": os.path.basename(engine.ffmpeg_path),
+        "license": license_manager.get_license_status()
     }
+
+
+@app.get("/api/license/status")
+def get_license():
+    """Get active license status and tier."""
+    return license_manager.get_license_status()
+
+
+@app.post("/api/license/activate")
+def activate_license(key: str = Form(...)):
+    """Validate and activate an algorithmic license key."""
+    result = license_manager.activate_key(key)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Invalid license key"))
+    return result
+
+
+@app.post("/api/license/deactivate")
+def deactivate_license():
+    """Deactivate license and revert to Community Edition."""
+    return license_manager.deactivate_key()
+
+
+@app.post("/api/system/open-url")
+def open_system_url(url: str = Form(...)):
+    """Open an external link (e.g. Revisited Labs) in the user's default browser."""
+    if url.startswith("https://") or url.startswith("http://"):
+        webbrowser.open_new_tab(url)
+        return {"success": True, "url": url}
+    raise HTTPException(status_code=400, detail="Invalid URL protocol")
 
 
 @app.post("/api/config/ai")

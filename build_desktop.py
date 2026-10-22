@@ -56,6 +56,7 @@ def main():
         "--hidden-import", "server",
         "--hidden-import", "dolce_engine",
         "--hidden-import", "ai_vision",
+        "--hidden-import", "license_manager",
         "--hidden-import", "cv2",
         "--hidden-import", "numpy",
         "--hidden-import", "PIL",

@@ -5,12 +5,19 @@ import AdjustmentSliders from './components/AdjustmentSliders';
 import VisionPanel from './components/VisionPanel';
 import VideoStudio from './components/VideoStudio';
 import BatchStudio from './components/BatchStudio';
+import SplashScreen from './components/SplashScreen';
+import AboutModal from './components/AboutModal';
+import LicenseModal from './components/LicenseModal';
 import { Upload, Sparkles, Zap, ShieldCheck, Download, RefreshCw, Cpu, Layers } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('photo');
   const [systemStatus, setSystemStatus] = useState(null);
+  const [license, setLicense] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showLicense, setShowLicense] = useState(false);
 
   // Photo State
   const [currentFile, setCurrentFile] = useState(null);
@@ -41,9 +48,24 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         setSystemStatus(data);
+        if (data.license) {
+          setLicense(data.license);
+        }
       }
     } catch (err) {
       console.warn('API server not yet connected:', err);
+    }
+  };
+
+  const fetchLicense = async () => {
+    try {
+      const res = await fetch('/api/license/status');
+      if (res.ok) {
+        const data = await res.json();
+        setLicense(data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch license status:', err);
     }
   };
 
@@ -209,12 +231,40 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950">
+      {/* Cinematic Startup Splash Screen */}
+      {showSplash && (
+        <SplashScreen
+          isReady={Boolean(systemStatus)}
+          onFinish={() => setShowSplash(false)}
+        />
+      )}
+
+      {/* About & Revisited Labs Modal */}
+      <AboutModal
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
+        license={license}
+        onOpenLicense={() => setShowLicense(true)}
+        hardwareLabel={systemStatus?.hardware || 'DirectML GPU'}
+      />
+
+      {/* Serial Number & License Management Modal */}
+      <LicenseModal
+        isOpen={showLicense}
+        onClose={() => setShowLicense(false)}
+        license={license}
+        onLicenseUpdated={fetchLicense}
+      />
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         hardwareLabel={systemStatus?.hardware || 'ONNX Engine Active'}
         hasVisionKey={systemStatus?.ai_config?.has_key}
         onSelectSample={handleSelectSample}
+        license={license}
+        onOpenAbout={() => setShowAbout(true)}
+        onOpenLicense={() => setShowLicense(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-6">
@@ -397,13 +447,27 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/90 py-3 px-6 text-center text-xs text-slate-600 flex items-center justify-between">
+      <footer className="border-t border-slate-900 bg-slate-950/90 py-3 px-6 text-center text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-slate-500">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
           <span>100% Private & Offline Colorization • No telemetry • No cloud upload</span>
         </div>
-        <div className="text-slate-500 font-mono text-[11px]">
-          Dolce Colore v2.0 Standalone Desktop Suite
+        <div className="flex items-center gap-3 text-slate-500 font-mono text-[11px]">
+          <button
+            onClick={() => setShowAbout(true)}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Revisited Labs
+          </button>
+          <span>•</span>
+          <button
+            onClick={() => setShowLicense(true)}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            {license?.is_pro ? 'Pro Active' : 'Community Edition'}
+          </button>
+          <span>•</span>
+          <span>v2.0 Native</span>
         </div>
       </footer>
     </div>
