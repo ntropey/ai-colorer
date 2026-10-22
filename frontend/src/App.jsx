@@ -8,6 +8,7 @@ import BatchStudio from './components/BatchStudio';
 import SplashScreen from './components/SplashScreen';
 import AboutModal from './components/AboutModal';
 import LicenseModal from './components/LicenseModal';
+import HelpModal from './components/HelpModal';
 import { Upload, Sparkles, Zap, ShieldCheck, Download, RefreshCw, Cpu, Layers } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showAbout, setShowAbout] = useState(false);
   const [showLicense, setShowLicense] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Photo State
   const [currentFile, setCurrentFile] = useState(null);
@@ -256,6 +258,12 @@ export default function App() {
         onLicenseUpdated={fetchLicense}
       />
 
+      {/* Keyboard Shortcuts & Quick Guide Modal */}
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -265,6 +273,7 @@ export default function App() {
         license={license}
         onOpenAbout={() => setShowAbout(true)}
         onOpenLicense={() => setShowLicense(true)}
+        onOpenHelp={() => setShowHelp(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-6">
