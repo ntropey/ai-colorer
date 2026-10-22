@@ -5,6 +5,33 @@ This is a working journal (not user-facing docs) — see `README.md` for that.
 
 ---
 
+## 2026-10-22 — Dolce Colore v2.0 Standalone Desktop Suite
+
+**Full Pinokio & PyTorch Decoupling with ONNX Runtime & Native Desktop Shell**
+- **Decoupled from Pinokio**: Archived legacy scripts (pinokio.js, install.js, torch.js, etc.) into legacy_pinokio/.
+- **PyTorch eliminated in favor of ONNX Runtime**: Shrank runtime requirement from a 4.5 GB PyTorch environment down to a ~130 MB ONNX model (ddcolor-tiny-fp16.onnx). Enabled direct hardware acceleration across DirectML, CoreML, and multi-core AVX on CPU.
+- **Engine rewrite (dolce_engine.py)**:
+  - Full luminance-preserving Lab color space pipeline preserving 100% of the input photograph's sharpness and grain.
+  - Sub-3ms instantaneous color grading (apply_adjustments: Saturation, Contrast, Color Temperature, Exposure bias).
+  - Bundled standalone static FFmpeg binary in tools/ffmpeg.exe for reliable audio stream remuxing, video frame piping, and side-by-side exports.
+- **AI Historical Vision Assistant (ai_vision.py)**:
+  - Pure standard-library HTTPS calls to Google Gemini, OpenAI, Claude, and OpenRouter with zero external SDK bloat.
+  - Era detection, setting analysis, historical authentic pigments/dyes, skin-tone critique, and automatic grading bias application.
+- **Modern Desktop Frontend (frontend/)**:
+  - Built with React 19, Vite, Tailwind CSS v4, Lucide icons, and Canvas Confetti.
+  - **Interactive Side-by-Side Split Slider** with before/after comparison handle.
+  - **Live Real-time Color Tuning Sliders** (instantaneous 60fps canvas reaction).
+  - **AI Historical Vision Guide Drawer** with period dye chips and skin tone critique.
+  - **Cinema Video Colorizer** with 5s/10s preview snippets, resolution scaling (720p/480p), live FPS telemetry, and ETA calculation.
+  - **Batch Archive** photo album colorizer.
+  - Built-in historical sample photos (Audrey Hepburn, Chaplin & Keller 1919, Armstrong 1946, 1930s NY).
+- **Standalone Packaging (desktop.py & build_desktop.py)**:
+  - Native PyWebView desktop application with --noconsole terminal elimination.
+  - Compiled to single standalone directory bundle dist/DolceColore/DolceColore.exe (16.4 MB exe).
+  - Inno Setup installer script generated (installer/dolce_colore.iss).
+
+---
+
 ## 2026-09-11
 
 **AI-guided video color grading (wired in, previously display-only)**

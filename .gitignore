@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Node / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Upstream vendored code
+app/
+
+# App outputs / local weights / tools
+tools/*.exe
+tools/ffmpeg
+models/*.onnx
+models/*.pth
+*.mp4
+*.png
+!icon.png
+*.ico
+!icon.ico
+
+# User config & keys
+.env
+.dolce_colore/

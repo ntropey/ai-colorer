@@ -1,60 +1,87 @@
 # 🎨 Dolce Colore
 
-Locally colorize black-and-white public domain movies and historical photos using
-[DDColor](https://github.com/piddnad/DDColor) (ICCV 2023), a state-of-the-art neural
-colorization architecture. Runs 100% locally on your computer — no Nvidia GPU, no
-high-powered graphics card, and no paid cloud API required. Optimized to run on standard
-CPUs and Intel integrated graphics out of the box, with automatic GPU acceleration (NVIDIA CUDA,
-Apple Silicon MPS, or Intel XPU) when detected.
+**1-Click Historical Photo & Video Colorizer — 100% Private, Local AI Neural Restoration.**
+
+A standalone, double-clickable native desktop application for Windows and macOS. Completely eliminates the need for Pinokio, Python virtual environments, or terminal commands.
+
+Powered by **ONNX Runtime** and [DDColor](https://github.com/piddnad/DDColor) (ICCV 2023), Dolce Colore restores authentic, period-accurate color to black-and-white photographs and archival films. Runs 100% offline on standard CPUs, Intel Iris/Arc graphics, Apple Silicon, or NVIDIA GPUs with zero telemetry and zero cloud dependencies.
 
 ---
 
 ## ✨ Features
 
-- 🖼️ **Single Photo Restoration**:
-  - Neural colorization with real-time **Side-by-Side Comparison** tab.
-  - **Instant Color Tuning**: Fine-tune Saturation (vibrancy), Contrast, and Color Temperature (cool blue ← → warm amber) and apply changes instantly without waiting for neural re-calculation.
-  - One-click full-resolution PNG download.
-  - Built-in historical archive samples (Audrey Hepburn, Charlie Chaplin & Helen Keller 1919, Louis Armstrong 1946, 1930s New York, etc.).
+- 🖼️ **Photo Studio (Instant Neural Restoration)**:
+  - **Interactive Side-by-Side Split Slider**: Drag between the monochrome original and the colorized restoration in real time.
+  - **Live 60 FPS Color Grading**: Tune Saturation (vibrancy), Contrast, Color Temperature (cool blue ← → warm amber), and Exposure Bias with instant feedback.
+  - **1-Click High-Res PNG Export & Clipboard Copy**: Save uncompressed restorations directly to your disk or clipboard.
+  - **Built-in Archival Classics**: Instant 1-click loading for Audrey Hepburn, Charlie Chaplin & Helen Keller (1919), Louis Armstrong (1946), 1930s New York, and London 1945.
 
-- 🤖 **Optional AI Vision Historical Guidance**:
-  - Connect an optional Vision API key (**Google Gemini** free tier, **OpenAI**, **Anthropic**, or **OpenRouter**) to act as a historical researcher.
-  - The AI inspects the monochrome scene, identifies authentic period dyes, military uniforms, and architectural materials, and generates a visual palette with historical notes.
-  - **AI Colorist Critique**: One-click review that evaluates skin tones and fine-tunes color warmth and saturation automatically.
-  - 100% optional: Works completely offline and local when no key is provided.
+- 🤖 **Historical AI Vision Guidance (Optional)**:
+  - Connect a free **Google Gemini** API key (or OpenAI / Claude / OpenRouter) to act as a historical researcher.
+  - Inspects the monochrome scene to identify the authentic era (*1910s Pre-WWI*, *1920s Roaring 20s*, *1940s WWII*), architectural materials, and period fabric dyes.
+  - **Interactive Period Dye Swatches**: Displays authentic pigments (e.g., Prussian Blue, Alizarin Crimson, Chrome Yellow) with hex codes and historical provenance.
+  - **AI Colorist Critique**: Evaluates skin tones and color balance, recommending 1-click grading adjustments.
+  - 100% optional: Works completely offline when no API key is provided.
 
-- 📁 **Batch Photo Processing**:
-  - Drop multiple archival scans or photo albums to colorize them in a single batch.
-  - Interactive result gallery and one-click `.zip` bundle download.
-
-- 🎬 **Movie & Video Colorization**:
+- 🎬 **Cinema Video Colorizer**:
   - Colorize classic public domain movies frame-by-frame with H.264 video encoding.
-  - **AI Keyframe Historical Grading (Optional)**: Analyze the opening frame with a Vision API and, if enabled, automatically apply its recommended saturation/contrast/temperature bias to every rendered frame.
-  - **Automatic Audio Preservation**: Synchronizes and muxes the original audio track back in.
-  - **Preview Snippet Modes**: Test the first 5 or 10 seconds or custom durations to verify color grading in seconds before processing a feature-length film!
+  - **Automatic Audio Preservation**: Synchronizes and muxes the original audio track back into the colorized MP4.
+  - **Preview Snippet Modes**: Test the first 5 or 10 seconds or custom durations to verify color grading in seconds before processing a full movie.
   - **Performance Downscaling**: Optional 720p or 480p downscaling for dramatic speedups on standard laptops and Intel graphics.
-  - **Side-by-Side Video Mode**: Generates split-screen videos (original B&W on left, colorized on right) for social media and demonstration reels.
-  - Live progress display with FPS throughput and ETA estimates.
+  - **Side-by-Side Split Video Mode**: Generates split-screen videos (original B&W on left, colorized on right) for demonstration reels.
+  - Live throughput telemetry: FPS speed, frame progress bar, elapsed time, and ETA.
 
-- 🧩 **DDColor Model Zoo**:
-  - **DDColor-L ModelScope (Default)**: Best overall photorealism for general photos and movies.
-  - **DDColor-L Artistic**: Saturated, rich colors with minimal color-bleeding artifacts.
-  - **DDColor-T Tiny**: Ultra-lightweight model running ~3× faster, ideal for video and CPU/Intel hardware.
-  - **DDColor-Paper**: Original ICCV 2023 research benchmark weights.
+- 📁 **Batch Archival Queue**:
+  - Drop full archival scans, photo albums, or glass-plate negatives for automated batch colorization.
+  - Visual gallery of restored images and 1-click downloads.
 
----
-
-## 🚀 How to Run with Pinokio
-
-1. Click **Install** from the Pinokio sidebar.
-2. Click **Start** to launch the local web server.
-3. Click **Open Web UI** to start colorizing movies and photos!
+- ⚡ **Lightweight ONNX Runtime Engine (Zero PyTorch Bloat)**:
+  - Model weights shrunken from 4.5 GB down to ~130 MB.
+  - Hardware acceleration via **DirectML** on Windows, **CoreML** on Apple Silicon, and multi-core AVX on CPU.
+  - Bundled static FFmpeg binary included out of the box.
 
 ---
 
-## 🏛️ Public Domain Movie & Photo Archives
+## 🚀 Running the Desktop App
 
-Looking for vintage movies and photographs to colorize? These public domain archives offer free downloads:
+### Double-Click Native Desktop Mode
+Double-click `dist/DolceColore/DolceColore.exe` (or run `python desktop.py` in your development environment).
+
+A native desktop window opens immediately—no command prompt, no terminal window, no browser tab.
+
+```bash
+# Development runner:
+python desktop.py
+
+# Or run in headless/browser mode:
+python desktop.py --web-only
+```
+
+---
+
+## 🛠️ Building Standalone Installers
+
+### 1. Build the Complete Executable Bundle
+To compile the React frontend and bundle the standalone `DolceColore.exe`:
+
+```bash
+python build_desktop.py
+```
+
+The output will be placed in `dist/DolceColore/DolceColore.exe`.
+
+### 2. Windows Installer (Inno Setup)
+An Inno Setup script is provided in `installer/dolce_colore.iss`. To compile the single-file setup installer:
+
+```bash
+iscc installer/dolce_colore.iss
+```
+This generates `dist-installer/DolceColore-Setup-v2.0.0.exe` with desktop icon, start menu shortcut, and clean uninstaller.
+
+---
+
+## 🏛️ Public Domain Archives for Vintage Media
+
 - **[Internet Archive: Prelinger Archives](https://archive.org/details/prelinger)**: Over 17,000 vintage educational, industrial, and advertising films.
 - **[Library of Congress National Screening Room](https://www.loc.gov/collections/national-screening-room/)**: Historic American short films and newsreels.
 - **[Wikimedia Commons Public Domain Media](https://commons.wikimedia.org/wiki/Category:Public_domain_videos)**: Silent classics, speeches, and scientific footage.
@@ -62,95 +89,6 @@ Looking for vintage movies and photographs to colorize? These public domain arch
 
 ---
 
-## 🔌 API Documentation
+## 📄 License
 
-The web UI is powered by Gradio and exposes `colorize_image` and `colorize_video` as standard API endpoints. Replace `<url>` below with the address shown on the "Open Web UI" tab (e.g. `http://127.0.0.1:7860`).
-
-### Python (`gradio_client`)
-
-```python
-from gradio_client import Client, handle_file
-
-client = Client("<url>")
-
-# 1. Colorize Image
-result = client.predict(
-    img=handle_file("input.jpg"),
-    model_name="DDColor-L ModelScope (Best for General Photos & Movies)",
-    input_size=512,
-    saturation=1.0,
-    contrast=1.0,
-    temperature=0,
-    api_name="/colorize_image"
-)
-# Returns: [colorized_image_path, side_by_side_path, download_file_path, status_text]
-print("Colorized Image:", result[0])
-
-# 2. Colorize Video
-video_result = client.predict(
-    video_path=handle_file("vintage_clip.mp4"),
-    model_name="DDColor-T Tiny (Fast & Lightweight - Recommended for CPU/Intel)",
-    input_size=384,
-    mode="Preview: First 5 Seconds",
-    preview_duration=5,
-    video_scale="Original Resolution",
-    output_format="Full Colorized Video",
-    ai_apply_grading=False,          # set True to auto-analyze the first frame and grade every frame to match
-    ai_provider="Google Gemini",
-    ai_key="",
-    ai_model="gemini-2.0-flash",
-    ai_context="",
-    api_name="/colorize_video"
-)
-print("Colorized Video:", video_result[0])
-```
-
-### JavaScript (`@gradio/client`)
-
-```javascript
-import { Client } from "@gradio/client";
-
-const client = await Client.connect("<url>");
-
-// Image Colorization
-const imageResult = await client.predict("/colorize_image", {
-  img: await client.uploadFile(imageFile),
-  model_name: "DDColor-L ModelScope (Best for General Photos & Movies)",
-  input_size: 512,
-  saturation: 1.0,
-  contrast: 1.0,
-  temperature: 0
-});
-console.log("Colorized image:", imageResult.data[0]);
-
-// Video Colorization
-const videoResult = await client.predict("/colorize_video", {
-  video_path: await client.uploadFile(videoFile),
-  model_name: "DDColor-T Tiny (Fast & Lightweight - Recommended for CPU/Intel)",
-  input_size: 384,
-  mode: "Preview: First 5 Seconds",
-  preview_duration: 5,
-  video_scale: "Original Resolution",
-  output_format: "Full Colorized Video",
-  ai_apply_grading: false, // set true to auto-analyze the first frame and grade every frame to match
-  ai_provider: "Google Gemini",
-  ai_key: "",
-  ai_model: "gemini-2.0-flash",
-  ai_context: ""
-});
-console.log("Colorized video:", videoResult.data[0]);
-```
-
-### cURL
-
-Gradio's queued HTTP API uses POST to initiate a job followed by GET to stream the result events:
-
-```sh
-# 1. Submit colorization job
-curl -X POST "<url>/call/colorize_image" \
-  -H "Content-Type: application/json" \
-  -d '{"data": [{"path": "/absolute/path/to/input.jpg"}, "DDColor-L ModelScope (Best for General Photos & Movies)", 512, 1.0, 1.0, 0]}'
-
-# 2. Receive the Server-Sent Event stream result
-curl -N "<url>/call/colorize_image/<event_id>"
-```
+Dolce Colore is licensed under the Apache 2.0 License. DDColor research models are provided by the respective authors under their original research licenses.
