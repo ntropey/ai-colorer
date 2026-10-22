@@ -2,7 +2,7 @@
 ; Published by Revisited Labs (https://revisitedlabs.com)
 
 #define MyAppName "Dolce Colore"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.0.1"
 #define MyAppPublisher "Revisited Labs"
 #define MyAppURL "https://revisitedlabs.com"
 #define MyAppExeName "DolceColore.exe"
