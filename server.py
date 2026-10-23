@@ -34,6 +34,7 @@ logger.info("server.py: importing ai_vision...")
 import ai_vision
 logger.info("server.py: importing license_manager...")
 import license_manager
+import update_checker
 from app_version import __version__
 import webbrowser
 
@@ -117,6 +118,12 @@ def activate_license(key: str = Form(...)):
 def deactivate_license():
     """Deactivate license and revert to Community Edition."""
     return license_manager.deactivate_key()
+
+
+@app.get("/api/update/check")
+def check_for_update():
+    """Manual "Check for updates": one request to the GitHub Releases API, only when asked."""
+    return update_checker.check_for_update()
 
 
 @app.post("/api/system/open-url")

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { APP_VERSION } from '../version';
-import { X, ExternalLink, ShieldCheck, Cpu, Key, Sparkles, Heart } from 'lucide-react';
+import { X, ExternalLink, ShieldCheck, Cpu, Key, Sparkles, Heart, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function AboutModal({
   isOpen,
@@ -9,18 +9,37 @@ export default function AboutModal({
   onOpenLicense,
   hardwareLabel = "DirectML GPU"
 }) {
+  // idle | checking | done | error
+  const [updateState, setUpdateState] = useState('idle');
+  const [updateInfo, setUpdateInfo] = useState(null);
+
   if (!isOpen) return null;
 
-  const handleOpenRevisitedLabs = async () => {
+  const openUrl = async (url) => {
     try {
       const formData = new FormData();
-      formData.append('url', 'https://revisitedlabs.com');
+      formData.append('url', url);
       await fetch('/api/system/open-url', {
         method: 'POST',
         body: formData,
       });
     } catch (e) {
-      window.open('https://revisitedlabs.com', '_blank');
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleOpenRevisitedLabs = () => openUrl('https://revisitedlabs.com');
+
+  const handleCheckUpdates = async () => {
+    setUpdateState('checking');
+    try {
+      const res = await fetch('/api/update/check');
+      const data = await res.json();
+      setUpdateInfo(data);
+      setUpdateState(data.error ? 'error' : 'done');
+    } catch (e) {
+      setUpdateInfo(null);
+      setUpdateState('error');
     }
   };
 
@@ -129,6 +148,58 @@ export default function AboutModal({
             >
               {license?.is_pro ? 'Manage License Key' : 'Enter Serial Number / Activate Pro'}
             </button>
+          </div>
+
+          {/* Check for updates (manual only) */}
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-slate-400 font-semibold flex items-center gap-1.5">
+                <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                Updates
+              </span>
+              <button
+                type="button"
+                onClick={handleCheckUpdates}
+                disabled={updateState === 'checking'}
+                className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-60 border border-slate-800 text-slate-200 font-semibold text-xs transition-colors cursor-pointer disabled:cursor-wait"
+              >
+                {updateState === 'checking' ? 'Checking…' : 'Check for updates'}
+              </button>
+            </div>
+            <div aria-live="polite" className="text-[11px] text-slate-400 space-y-2">
+              {updateState === 'done' && updateInfo && !updateInfo.update_available && (
+                <p className="flex items-center gap-1.5 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  You're up to date (v{updateInfo.current}).
+                </p>
+              )}
+              {updateState === 'done' && updateInfo?.update_available && (
+                <>
+                  <p className="text-amber-300 font-semibold">
+                    Version {updateInfo.latest} is available. You have v{updateInfo.current}.
+                  </p>
+                  {updateInfo.notes && (
+                    <p className="whitespace-pre-line text-slate-500 max-h-24 overflow-y-auto">{updateInfo.notes}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => openUrl(updateInfo.download_url)}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    <span>Download version {updateInfo.latest}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                </>
+              )}
+              {updateState === 'error' && (
+                <p className="text-rose-300">
+                  Couldn't check right now. Make sure you're online and try again.
+                </p>
+              )}
+              <p className="text-[10px] text-slate-500">
+                Only checks when you press the button. It contacts revisitedlabs.com and sends nothing about you or your photos.
+              </p>
+            </div>
           </div>
 
           {/* Technical Architecture Specs */}
