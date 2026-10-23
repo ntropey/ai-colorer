@@ -183,7 +183,7 @@ export default function AboutModal({
                   )}
                   <button
                     type="button"
-                    onClick={() => openUrl(updateInfo.release_url)}
+                    onClick={() => openUrl(updateInfo.download_url)}
                     className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer"
                   >
                     <span>Download version {updateInfo.latest}</span>
@@ -197,7 +197,7 @@ export default function AboutModal({
                 </p>
               )}
               <p className="text-[10px] text-slate-500">
-                Only checks when you press the button. It contacts github.com and sends nothing about you or your photos.
+                Only checks when you press the button. It contacts revisitedlabs.com and sends nothing about you or your photos.
               </p>
             </div>
           </div>

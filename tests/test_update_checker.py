@@ -32,19 +32,25 @@ class UpdateCheckerTests(unittest.TestCase):
         self.assertFalse(uc.is_newer("v2.0.1", "2.0.2"))
 
     def test_update_available(self):
-        opener = fake_opener({"tag_name": "v2.0.3", "html_url": "https://github.com/ntropey/ai-colorer/releases/tag/v2.0.3", "body": "Notes"})
+        opener = fake_opener({"version": "2.0.3", "download_url": "https://revisitedlabs.com/dolce-colore", "notes": "Notes"})
         r = uc.check_for_update("2.0.2", opener)
         self.assertTrue(r["update_available"])
         self.assertEqual(r["latest"], "2.0.3")
         self.assertEqual(r["notes"], "Notes")
 
     def test_up_to_date(self):
-        opener = fake_opener({"tag_name": "v2.0.2", "html_url": "https://github.com/ntropey/ai-colorer/releases/tag/v2.0.2"})
+        opener = fake_opener({"version": "2.0.2", "download_url": "https://revisitedlabs.com/dolce-colore"})
         self.assertFalse(uc.check_for_update("2.0.2", opener)["update_available"])
 
-    def test_foreign_release_url_is_replaced(self):
-        opener = fake_opener({"tag_name": "v9.0.0", "html_url": "https://evil.example/x"})
-        self.assertTrue(uc.check_for_update("2.0.2", opener)["release_url"].startswith(uc.RELEASE_PAGE_PREFIX))
+    def test_untrusted_download_url_is_replaced(self):
+        for bad in ("https://evil.example/x", "http://revisitedlabs.com/x", "https://revisitedlabs.com.evil.example/x", "javascript:alert(1)", None):
+            opener = fake_opener({"version": "9.0.0", "download_url": bad})
+            self.assertEqual(uc.check_for_update("2.0.2", opener)["download_url"], uc.FALLBACK_DOWNLOAD_URL, bad)
+
+    def test_trusted_download_urls_are_kept(self):
+        for good in ("https://revisitedlabs.com/dolce-colore", "https://revisitedlabs.lemonsqueezy.com/buy/abc"):
+            opener = fake_opener({"version": "9.0.0", "download_url": good})
+            self.assertEqual(uc.check_for_update("2.0.2", opener)["download_url"], good)
 
     def test_offline(self):
         def boom(request, timeout=None):
@@ -53,7 +59,7 @@ class UpdateCheckerTests(unittest.TestCase):
         self.assertEqual(uc.check_for_update("2.0.2", boom)["error"], "unreachable")
 
     def test_garbage_tag(self):
-        self.assertEqual(uc.check_for_update("2.0.2", fake_opener({"tag_name": "nightly"}))["error"], "unreadable")
+        self.assertEqual(uc.check_for_update("2.0.2", fake_opener({"version": "nightly"}))["error"], "unreadable")
 
 
 if __name__ == "__main__":

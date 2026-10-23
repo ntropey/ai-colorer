@@ -1,18 +1,24 @@
 """Dolce Colore - manual "Check for updates".
 
-Runs only when the user presses the button. It makes one HTTPS request to the
-public GitHub Releases API and sends nothing about the user or their files.
+Runs only when the user presses the button. It makes one HTTPS request for a
+small JSON file on revisitedlabs.com and sends nothing about the user or their
+files. Where the installers are hosted (GitHub, Lemon Squeezy, ...) is decided
+by that file, not by this code:
+
+    {"version": "2.0.2", "download_url": "https://revisitedlabs.com/dolce-colore", "notes": "..."}
 """
 
 import json
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from app_version import __version__
 
-RELEASES_URL = "https://api.github.com/repos/ntropey/ai-colorer/releases/latest"
-RELEASE_PAGE_PREFIX = "https://github.com/ntropey/ai-colorer/"
+MANIFEST_URL = "https://revisitedlabs.com/dolce-colore-latest.json"
+FALLBACK_DOWNLOAD_URL = "https://revisitedlabs.com/dolce-colore"
+ALLOWED_DOWNLOAD_HOSTS = ("revisitedlabs.com", "lemonsqueezy.com")
 TIMEOUT_SECONDS = 6
 
 
@@ -27,15 +33,20 @@ def is_newer(latest: str, current: str) -> bool:
     return a is not None and b is not None and a > b
 
 
+def safe_download_url(url: str) -> str:
+    """Only https links on our own sites or Lemon Squeezy are ever opened."""
+    parts = urllib.parse.urlparse(str(url or ""))
+    host = (parts.hostname or "").lower()
+    trusted = any(host == h or host.endswith("." + h) for h in ALLOWED_DOWNLOAD_HOSTS)
+    return url if parts.scheme == "https" and trusted else FALLBACK_DOWNLOAD_URL
+
+
 def check_for_update(current: str = __version__, opener=urllib.request.urlopen) -> dict:
-    """Return {current, latest, update_available, release_url, notes} or {current, error}."""
+    """Return {current, latest, update_available, download_url, notes} or {current, error}."""
     result = {"current": current}
     request = urllib.request.Request(
-        RELEASES_URL,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "User-Agent": f"DolceColore/{current} (update check)",
-        },
+        MANIFEST_URL,
+        headers={"Accept": "application/json", "User-Agent": f"DolceColore/{current} (update check)"},
     )
     try:
         with opener(request, timeout=TIMEOUT_SECONDS) as response:
@@ -44,19 +55,15 @@ def check_for_update(current: str = __version__, opener=urllib.request.urlopen) 
         result["error"] = "unreachable"
         return result
 
-    tag = str(data.get("tag_name", ""))
-    if parse_version(tag) is None:
+    version = str(data.get("version", "")) if isinstance(data, dict) else ""
+    if parse_version(version) is None:
         result["error"] = "unreadable"
         return result
 
-    url = str(data.get("html_url", ""))
-    if not url.startswith(RELEASE_PAGE_PREFIX):
-        url = RELEASE_PAGE_PREFIX + "releases"
-
     result.update(
-        latest=tag.lstrip("v"),
-        update_available=is_newer(tag, current),
-        release_url=url,
-        notes=str(data.get("body") or "")[:600],
+        latest=version.lstrip("v"),
+        update_available=is_newer(version, current),
+        download_url=safe_download_url(data.get("download_url")),
+        notes=str(data.get("notes") or "")[:600],
     )
     return result
