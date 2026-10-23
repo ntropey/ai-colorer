@@ -45,3 +45,42 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+// Video colorization needs FFmpeg. We don't bundle it; check for it before installing.
+// Photos work without it, so a missing FFmpeg is a warning, never a blocker.
+const
+  FFmpegDownloadPage = 'https://ffmpeg.org/download.html';
+
+function FFmpegInstalled(): Boolean;
+begin
+  Result := FileSearch('ffmpeg.exe', GetEnv('PATH')) <> '';
+end;
+
+function InitializeSetup(): Boolean;
+var
+  ErrorCode: Integer;
+begin
+  Result := True;
+  if FFmpegInstalled() then
+    Exit;
+
+  // A silent install (e.g. an automatic update) answers "No": install and carry on.
+  case SuppressibleMsgBox(
+    'FFmpeg was not found on this computer.' + #13#10 + #13#10 +
+    'Dolce Colore needs FFmpeg to colorize VIDEO. Photo colorization works without it.' + #13#10 + #13#10 +
+    'Yes  - Get FFmpeg first (opens the download page and closes Setup)' + #13#10 +
+    'No   - Install Dolce Colore now and add FFmpeg later' + #13#10 +
+    'Cancel - Quit Setup' + #13#10 + #13#10 +
+    'Tip: in Windows Terminal, "winget install Gyan.FFmpeg" installs it in one step. ' +
+    'Restart Dolce Colore afterwards so it can find it.',
+    mbConfirmation, MB_YESNOCANCEL, IDNO) of
+    IDYES:
+      begin
+        ShellExec('open', FFmpegDownloadPage, '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+        Result := False;
+      end;
+    IDCANCEL:
+      Result := False;
+  end;
+end;
