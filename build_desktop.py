@@ -60,6 +60,7 @@ def main():
         "--hidden-import", "ai_vision",
         "--hidden-import", "license_manager",
         "--hidden-import", "app_version",
+        "--hidden-import", "update_checker",
         "--hidden-import", "cv2",
         "--hidden-import", "numpy",
         "--hidden-import", "PIL",
