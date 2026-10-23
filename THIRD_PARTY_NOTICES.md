@@ -27,6 +27,8 @@ encoders such as x264 are GPL.
 - The macOS app bundles the FFmpeg build installed by Homebrew on the release machine. On
   request, Revisited Labs will provide the corresponding source for the exact build included
   in a release: support@revisitedlabs.com.
+- The Windows app does not include FFmpeg. Setup checks for an FFmpeg already installed on the
+  computer and links to the download page if there isn't one; the app then uses that copy.
 - FFmpeg runs as its own executable, separate from the Dolce Colore application code.
 
 ## Python components (bundled into the desktop app)
