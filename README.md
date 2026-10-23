@@ -38,7 +38,7 @@ Powered by **ONNX Runtime** and [DDColor](https://github.com/piddnad/DDColor) (I
 - ⚡ **Lightweight ONNX Runtime Engine (Zero PyTorch Bloat)**:
   - Model weights shrunken from 4.5 GB down to ~130 MB.
   - Hardware acceleration via **DirectML** on Windows, **CoreML** on Apple Silicon, and multi-core AVX on CPU.
-  - Bundled static FFmpeg binary included out of the box.
+  - macOS includes FFmpeg. On Windows, Setup checks for FFmpeg and tells you how to get it if it is missing (needed for video only).
 
 ---
 
