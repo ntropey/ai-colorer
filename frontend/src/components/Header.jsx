@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { APP_VERSION } from '../version';
 import { Sparkles, Cpu, Film, Image as ImageIcon, FolderArchive, Layers, HelpCircle, X, Info, Key, Award } from 'lucide-react';
 
 export default function Header({
@@ -40,7 +41,7 @@ export default function Header({
                 Dolce Colore
               </h1>
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25">
-                v2.0 Native
+                v{APP_VERSION}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 group-hover:text-slate-300 transition-colors">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { APP_VERSION } from '../version';
 import { Sparkles, Shield, Cpu } from 'lucide-react';
 
 export default function SplashScreen({ isReady, onFinish }) {
@@ -56,7 +57,7 @@ export default function SplashScreen({ isReady, onFinish }) {
           <Shield className="w-3.5 h-3.5 text-emerald-400" />
           100% Local & Private AI
         </span>
-        <span>v2.0 Native Edition</span>
+        <span>v{APP_VERSION}</span>
       </div>
 
       {/* Center Branding & Progress */}

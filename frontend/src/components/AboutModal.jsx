@@ -1,4 +1,5 @@
 import React from 'react';
+import { APP_VERSION } from '../version';
 import { X, ExternalLink, ShieldCheck, Cpu, Key, Sparkles, Heart } from 'lucide-react';
 
 export default function AboutModal({
@@ -52,7 +53,7 @@ export default function AboutModal({
                   Dolce Colore
                 </h2>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  v2.0 Native
+                  v{APP_VERSION}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">

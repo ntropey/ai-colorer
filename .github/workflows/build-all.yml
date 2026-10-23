@@ -24,6 +24,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check the release tag matches app_version.py
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          V=$(python -c "from app_version import __version__; print(__version__)")
+          if [ "v$V" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match app_version.py ($V). Bump it, merge, then tag again."
+            exit 1
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -58,7 +68,8 @@ jobs:
       - name: Create Portable Zip
         shell: pwsh
         run: |
-          Compress-Archive -Path dist/DolceColore -DestinationPath dist-installer/DolceColore_v2.0.0_Windows_Portable.zip
+          $v = python -c "from app_version import __version__; print(__version__)"
+          Compress-Archive -Path dist/DolceColore -DestinationPath "dist-installer/DolceColore_v${v}_Windows_Portable.zip"
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
@@ -77,6 +88,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Check the release tag matches app_version.py
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          V=$(python -c "from app_version import __version__; print(__version__)")
+          if [ "v$V" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match app_version.py ($V). Bump it, merge, then tag again."
+            exit 1
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -137,6 +158,6 @@ jobs:
             Crafted by **Revisited Labs** ([https://revisitedlabs.com](https://revisitedlabs.com))
 
             ### Downloads:
-            - **Windows Setup Installer**: `DolceColore_Setup_v2.0.0.exe` (Single-click installer with Start Menu & Desktop shortcuts)
-            - **Windows Portable**: `DolceColore_v2.0.0_Windows_Portable.zip` (Zero installation required)
-            - **macOS Disk Image**: `DolceColore_v2.0.0_macOS.dmg` (Apple Silicon M1/M2/M3/M4 & Intel native)
+            - **Windows Setup Installer**: `DolceColore_Setup_${{ github.ref_name }}.exe` (Single-click installer with Start Menu & Desktop shortcuts)
+            - **Windows Portable**: `DolceColore_${{ github.ref_name }}_Windows_Portable.zip` (Zero installation required)
+            - **macOS Disk Image**: `DolceColore_${{ github.ref_name }}_macOS.dmg` (Apple Silicon M1/M2/M3/M4 & Intel native)

@@ -9,6 +9,8 @@ import shutil
 import subprocess
 
 _ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _ROOT)
+from app_version import __version__
 
 
 def run(cmd, cwd=_ROOT):
@@ -57,6 +59,7 @@ def main():
         "--hidden-import", "dolce_engine",
         "--hidden-import", "ai_vision",
         "--hidden-import", "license_manager",
+        "--hidden-import", "app_version",
         "--hidden-import", "cv2",
         "--hidden-import", "numpy",
         "--hidden-import", "PIL",
@@ -132,7 +135,7 @@ def main():
     if iscc:
         print(f"\n[3/3] Compiling Windows Setup Installer with Inno Setup ({iscc})...")
         iss_path = os.path.join(_ROOT, "installer", "dolce_colore.iss")
-        run(f'"{iscc}" "{iss_path}"')
+        run(f'"{iscc}" /DMyAppVersion={__version__} "{iss_path}"')
         print("SUCCESS: Windows Setup Installer generated in dist-installer/!")
     else:
         print("\n[Note] Inno Setup compiler (ISCC.exe) not found on PATH. dist/DolceColore is ready for portable distribution or zip packaging.")

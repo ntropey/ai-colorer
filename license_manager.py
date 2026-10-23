@@ -14,6 +14,8 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import datetime
+
+from app_version import __version__
 from typing import Dict, Any, Tuple
 
 SALT = "REVISITED_LABS_2026_DOLCE_SECRET_SALT_V1"
@@ -96,7 +98,7 @@ def activate_lemonsqueezy(license_key: str, instance_name: str = None) -> Tuple[
         data=data,
         headers={
             "Accept": "application/json",
-            "User-Agent": "DolceColore/2.0 (Revisited Labs)"
+            "User-Agent": f"DolceColore/{__version__} (Revisited Labs)"
         }
     )
 
@@ -136,7 +138,7 @@ def deactivate_lemonsqueezy(license_key: str, instance_id: str) -> Tuple[bool, s
         data=data,
         headers={
             "Accept": "application/json",
-            "User-Agent": "DolceColore/2.0 (Revisited Labs)"
+            "User-Agent": f"DolceColore/{__version__} (Revisited Labs)"
         }
     )
 

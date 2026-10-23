@@ -10,6 +10,8 @@ import shutil
 import subprocess
 
 _ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _ROOT)
+from app_version import __version__
 
 
 def run(cmd, cwd=_ROOT):
@@ -56,6 +58,7 @@ def main():
         "--hidden-import", "dolce_engine",
         "--hidden-import", "ai_vision",
         "--hidden-import", "license_manager",
+        "--hidden-import", "app_version",
         "--hidden-import", "cv2",
         "--hidden-import", "numpy",
         "--hidden-import", "PIL",
@@ -86,7 +89,7 @@ def main():
     print("\n[3/4] Creating macOS .dmg disk image...")
     dmg_out_dir = os.path.join(_ROOT, "dist-installer")
     os.makedirs(dmg_out_dir, exist_ok=True)
-    dmg_path = os.path.join(dmg_out_dir, "DolceColore_v2.0.0_macOS.dmg")
+    dmg_path = os.path.join(dmg_out_dir, f"DolceColore_v{__version__}_macOS.dmg")
 
     if shutil.which("create-dmg"):
         create_dmg_cmd = (
