@@ -91,4 +91,6 @@ This generates `dist-installer/DolceColore_Setup_v<version>.exe` with desktop ic
 
 ## 📄 License
 
-Dolce Colore is licensed under the Apache 2.0 License. DDColor research models are provided by the respective authors under their original research licenses.
+Dolce Colore is proprietary software of Revisited Labs. Personal and archival use is free; Pro features are unlocked with a license key. See [LICENSE](LICENSE) for the terms.
+
+It builds on open-source components, including the DDColor model (Apache 2.0) and FFmpeg. Their licenses and credits are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

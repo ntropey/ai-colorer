@@ -53,6 +53,7 @@ def main():
         "--add-data", f"{os.path.join(_ROOT, 'frontend', 'dist')}:frontend/dist",
         "--add-data", f"{os.path.join(_ROOT, 'models')}:models",
         "--add-data", f"{os.path.join(_ROOT, 'tools')}:tools",
+        "--add-data", f"{os.path.join(_ROOT, 'THIRD_PARTY_NOTICES.md')}:.",
         "--add-data", f"{os.path.join(_ROOT, 'icon.png')}:.",
         "--hidden-import", "server",
         "--hidden-import", "dolce_engine",
