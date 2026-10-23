@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { APP_VERSION } from './version';
 import Header from './components/Header';
 import CompareSlider from './components/CompareSlider';
 import AdjustmentSliders from './components/AdjustmentSliders';
@@ -543,7 +544,7 @@ export default function App() {
             {license?.is_pro ? 'Pro Active' : 'Community Edition'}
           </button>
           <span>•</span>
-          <span>v2.0 Native</span>
+          <span>v{APP_VERSION}</span>
         </div>
       </footer>
     </div>

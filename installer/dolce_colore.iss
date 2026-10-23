@@ -2,7 +2,10 @@
 ; Published by Revisited Labs (https://revisitedlabs.com)
 
 #define MyAppName "Dolce Colore"
-#define MyAppVersion "2.0.2"
+; build_desktop.py passes the real number from app_version.py (/DMyAppVersion=...).
+#ifndef MyAppVersion
+  #define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "Revisited Labs"
 #define MyAppURL "https://revisitedlabs.com"
 #define MyAppExeName "DolceColore.exe"

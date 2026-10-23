@@ -76,7 +76,7 @@ An Inno Setup script is provided in `installer/dolce_colore.iss`. To compile the
 ```bash
 iscc installer/dolce_colore.iss
 ```
-This generates `dist-installer/DolceColore-Setup-v2.0.0.exe` with desktop icon, start menu shortcut, and clean uninstaller.
+This generates `dist-installer/DolceColore_Setup_v<version>.exe` with desktop icon, start menu shortcut, and clean uninstaller.
 
 ---
 

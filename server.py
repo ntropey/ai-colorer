@@ -34,6 +34,7 @@ logger.info("server.py: importing ai_vision...")
 import ai_vision
 logger.info("server.py: importing license_manager...")
 import license_manager
+from app_version import __version__
 import webbrowser
 
 if getattr(sys, "frozen", False):
@@ -45,7 +46,7 @@ TEMP_DIR = os.path.join(tempfile.gettempdir(), "dolce_colore_media")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 logger.info("server.py: creating FastAPI app...")
-app = FastAPI(title="Dolce Colore API", version="2.0.0")
+app = FastAPI(title="Dolce Colore API", version=__version__)
 
 # Enable CORS for local Vite development
 app.add_middleware(
@@ -82,6 +83,7 @@ def get_system_status():
     if "ddcolor-tiny" in engine.sessions:
         active_hw = engine.sessions["ddcolor-tiny"][2]
     return {
+        "version": __version__,
         "hardware": active_hw,
         "providers_available": dolce_engine.PROVIDERS,
         "models": dolce_engine.AVAILABLE_MODELS,
