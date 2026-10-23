@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Columns, Download, Copy, Check, Eye, EyeOff, ZoomIn, ZoomOut } from 'lucide-react';
+import { Columns, Download, Copy, Check, Eye, EyeOff, ZoomIn, ZoomOut, ImagePlus, X } from 'lucide-react';
 
 export default function CompareSlider({
   originalUrl,
@@ -9,6 +9,8 @@ export default function CompareSlider({
   temperature = 0,
   brightness = 0,
   onDownload,
+  onNewPhoto,
+  onClear,
   title = "Dolce Colore Restoration"
 }) {
   const [sliderPos, setSliderPos] = useState(50);
@@ -149,8 +151,28 @@ export default function CompareSlider({
           </button>
         </div>
 
-        {/* Right Actions: Zoom, Copy & Download */}
-        <div className="flex items-center gap-2">
+        {/* Right Actions: New photo, Clear, Zoom, Copy & Download */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {onNewPhoto && (
+            <button
+              onClick={onNewPhoto}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors border border-slate-700 cursor-pointer"
+              title="Colorize a different photo"
+            >
+              <ImagePlus className="w-3.5 h-3.5 text-amber-400" />
+              New photo
+            </button>
+          )}
+          {onClear && (
+            <button
+              onClick={onClear}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors border border-slate-700 cursor-pointer"
+              title="Clear this photo and start over"
+            >
+              <X className="w-3.5 h-3.5 text-slate-400" />
+              Clear
+            </button>
+          )}
           <button
             onClick={() => setZoomMode(zoomMode === 'contain' ? 'cover' : 'contain')}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"

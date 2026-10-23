@@ -28,6 +28,8 @@ export default function App() {
   const [isColorizing, setIsColorizing] = useState(false);
   const [modelKey, setModelKey] = useState('ddcolor-tiny');
   const [metrics, setMetrics] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   // Tuning Sliders State
   const [saturation, setSaturation] = useState(1.0);
@@ -75,21 +77,16 @@ export default function App() {
     fetchStatus();
   }, []);
 
-  // Handle Photo Upload
-  const handlePhotoUpload = async (file) => {
+  // Handle Photo Upload. `key` lets a model change re-run with the new value
+  // instead of the stale one from this render.
+  const handlePhotoUpload = async (file, key = modelKey) => {
     if (!file) return;
-    setCurrentFile(file);
     setIsColorizing(true);
-    setAiAnalysis(null);
-    setAiCritique(null);
-
-    // Create client preview
-    const tempUrl = URL.createObjectURL(file);
-    setOriginalUrl(tempUrl);
+    setErrorMsg(null);
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('model_key', modelKey);
+    formData.append('model_key', key);
     formData.append('saturation', saturation);
     formData.append('contrast', contrast);
     formData.append('brightness', brightness);
@@ -102,6 +99,11 @@ export default function App() {
       });
       if (!res.ok) throw new Error('Colorization failed');
       const data = await res.json();
+      // Only swap the shown photo once the new one succeeded, so a failure
+      // never leaves a new original next to an old colorized image.
+      setCurrentFile(file);
+      setAiAnalysis(null);
+      setAiCritique(null);
       setColorizedUrl(data.colorized_url);
       setOriginalUrl(data.original_url);
       setMetrics(data.metrics);
@@ -109,9 +111,38 @@ export default function App() {
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
     } catch (err) {
       console.error('Error colorizing image:', err);
+      setErrorMsg("Sorry, that photo couldn't be colorized. Try another image, or check that the app is still running.");
     } finally {
       setIsColorizing(false);
     }
+  };
+
+  // Input change handler; resets the input so picking the same file again still fires.
+  const handleFilePicked = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    handlePhotoUpload(file);
+  };
+
+  const handleDropFile = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.[0]) handlePhotoUpload(e.dataTransfer.files[0]);
+  };
+
+  // Return to the empty drop screen and reset the grading sliders.
+  const handleClear = () => {
+    setConfirmClear(false);
+    setCurrentFile(null);
+    setOriginalUrl(null);
+    setColorizedUrl(null);
+    setMetrics(null);
+    setErrorMsg(null);
+    setAiAnalysis(null);
+    setAiCritique(null);
+    setSaturation(1.0);
+    setContrast(1.0);
+    setTemperature(0);
+    setBrightness(0);
   };
 
   // Load a historical sample
@@ -278,25 +309,35 @@ export default function App() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-6">
         {activeTab === 'photo' && (
-          <div className="space-y-6">
+          <div className="space-y-6" onDragOver={(e) => e.preventDefault()} onDrop={handleDropFile}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFilePicked}
+            />
+            {errorMsg && (
+              <p role="alert" className="px-4 py-3 rounded-xl bg-red-950/60 border border-red-800/60 text-sm text-red-200">
+                {errorMsg}
+              </p>
+            )}
             {!colorizedUrl && !isColorizing ? (
               /* Drag & Drop Hero Upload */
               <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (e.dataTransfer.files?.[0]) handlePhotoUpload(e.dataTransfer.files[0]);
-                }}
+                role="button"
+                tabIndex={0}
+                aria-label="Choose a black-and-white photo to colorize, or drop one here"
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
                 className="h-[520px] border-2 border-dashed border-slate-800 hover:border-amber-500/60 bg-slate-900/40 hover:bg-slate-900/70 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer transition-all p-8 text-center backdrop-blur-md shadow-2xl group"
               >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
-                />
                 <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/5">
                   <Upload className="w-8 h-8" />
                 </div>
@@ -356,6 +397,8 @@ export default function App() {
                       temperature={temperature}
                       brightness={brightness}
                       onDownload={handleDownload}
+                      onNewPhoto={() => fileInputRef.current?.click()}
+                      onClear={() => setConfirmClear(true)}
                     />
                   )}
 
@@ -367,21 +410,6 @@ export default function App() {
                         <span>Rendered in <strong>{metrics.elapsed_ms}ms</strong></span>
                         <span>•</span>
                         <span>{metrics.width}×{metrics.height} px</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="text-amber-400 hover:underline font-sans font-semibold text-xs"
-                        >
-                          Upload New Photo
-                        </button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
-                        />
                       </div>
                     </div>
                   )}
@@ -404,7 +432,7 @@ export default function App() {
                       onChange={(e) => {
                         const val = e.target.value;
                         setModelKey(val);
-                        if (currentFile) handlePhotoUpload(currentFile);
+                        if (currentFile) handlePhotoUpload(currentFile, val);
                       }}
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"
                     >
@@ -454,6 +482,45 @@ export default function App() {
           <BatchStudio />
         )}
       </main>
+
+      {confirmClear && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setConfirmClear(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setConfirmClear(false)}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="clear-title"
+            aria-describedby="clear-desc"
+            className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="clear-title" className="text-base font-bold text-slate-100">Clear this photo?</h2>
+            <p id="clear-desc" className="text-xs text-slate-400 mt-1">
+              This returns to the start screen and resets your color adjustments. Download first if you want to keep this result.
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setConfirmClear(false)}
+                className="px-3.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-3.5 py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950/90 py-3 px-6 text-center text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-2">
