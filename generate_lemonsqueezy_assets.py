@@ -5,7 +5,7 @@ Outputs:
 2. 02_split_comparison.png (1280x720) - Before / After restoration
 3. 03_studio_ui.png (1280x720) - Native desktop studio interface
 4. 04_cinema_colorizer.png (1280x720) - Cinema video engine & filmstrip
-5. 05_pro_features_guarantee.png (1280x720) - 4-pillar grid & 30-day guarantee
+5. 05_pro_features_guarantee.png (1280x720) - 4-pillar grid & try-it-free note
 6. 06_product_icon_512.png (512x512) - High-res square avatar/thumbnail
 """
 import os
@@ -126,7 +126,7 @@ def make_slide_1():
     # Pricing Box
     draw.rounded_rectangle([x, y, x + 530, y + 70], radius=12, fill=CARD_BG, outline=CARD_BORDER, width=1)
     draw.text((x + 18, y + 14), "$39 USD", font=get_font(26, bold=True), fill=TEXT_WHITE)
-    draw.text((x + 130, y + 20), "Lifetime License · No Subscriptions · 30-Day Guarantee", font=get_font(12), fill=ACCENT_AMBER)
+    draw.text((x + 130, y + 20), "Lifetime License · No Subscriptions · Free Version to Try", font=get_font(12), fill=ACCENT_AMBER)
 
     # Right Column: Showcase Window
     wx0, wy0, wx1, wy1 = 660, 85, 1205, 635
@@ -360,8 +360,8 @@ def make_slide_5():
          "Hardware accelerated on Windows (DirectX 12 DirectML) and macOS (Apple Silicon MPS). Experience lightning-fast rendering without queue wait times."),
         (75, 390, "🔑 Algorithmic Offline License",
          "Activates mathematically without calling home. Valid for offline, air-gapped workstations and multiple personal devices for life."),
-        (650, 390, "🛡️ 30-Day Money-Back Guarantee",
-         "Try Dolce Colore Pro 100% risk-free. If it does not perform to your expectations, email support@revisitedlabs.com for an immediate, full refund.")
+        (650, 390, "🎨 Try It Free First",
+         "The free Community Edition colorizes unlimited photos. Test Dolce Colore on your own photos and PC before you buy Pro.")
     ]
 
     for x0, y0, title, desc in grid_coords:
