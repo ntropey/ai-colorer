@@ -52,6 +52,7 @@ def main():
         "--add-data", f"{os.path.join(_ROOT, 'frontend', 'dist')}{os.pathsep}frontend/dist",
         "--add-data", f"{os.path.join(_ROOT, 'models')}{os.pathsep}models",
         "--add-data", f"{os.path.join(_ROOT, 'tools')}{os.pathsep}tools",
+        "--add-data", f"{os.path.join(_ROOT, 'THIRD_PARTY_NOTICES.md')}{os.pathsep}.",
         "--add-data", f"{os.path.join(_ROOT, 'icon.png')}{os.pathsep}.",
         "--add-data", f"{os.path.join(_ROOT, 'icon.ico')}{os.pathsep}.",
         "--add-data", f"{webview_lib_dir}{os.pathsep}webview/lib",
